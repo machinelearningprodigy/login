@@ -13,7 +13,7 @@
 <body>
     <div class="wrapper">
         <div class="error-message" id="error-message"></div> <!-- Error message container -->
-        <form action="">
+        <form id="login-form">
             <h1>Login</h1>
             <div class="input-box">
                 <input type="text" id="username" placeholder="Username" required>
@@ -32,53 +32,38 @@
             <button type="submit" class="btn">Login</button>
 
             <div class="register-link">
-                <p>Don't have an account?<a href="#">Register</a></p>
+                <p>Don't have an account?<a href="https://machinelearningprodigy.github.io/sign-up/">Register</a></p>
             </div>
         </form>
     </div>
 
     <script>
-        document.querySelector('form').addEventListener('submit', function (event) {
+        document.getElementById('login-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const errorFloatingMessage = document.createElement('div'); // Create floating error message container
 
-            let error = false;
-            let message = '';
+            try {
+                const response = await fetch('http://localhost:5000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
 
-            if (username.length <= 8) {
-                message += 'Username should be greater than 8 characters.<br>';
-                error = true;
-            }
-
-            // Password validation
-            const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-            if (!passwordRegex.test(password)) {
-                message += 'Password should be greater than 8 characters and include at least one capital letter, one digit, and one special character.<br>';
-                error = true;
-            }
-
-            if (error) {
-                errorFloatingMessage.innerHTML = message; // Set error message content
-                errorFloatingMessage.style.position = 'fixed'; // Set position to fixed
-                errorFloatingMessage.style.bottom = '20px'; // Set bottom position
-                errorFloatingMessage.style.left = '50%'; // Set left position
-                errorFloatingMessage.style.transform = 'translateX(-50%)'; // Center horizontally
-                errorFloatingMessage.style.backgroundColor = 'rgba(255, 0, 0, 0.8)'; // Set background color
-                errorFloatingMessage.style.color = 'white'; // Set text color
-                errorFloatingMessage.style.padding = '10px 20px'; // Set padding
-                errorFloatingMessage.style.borderRadius = '5px'; // Set border radius
-                errorFloatingMessage.style.zIndex = '999'; // Set z-index
-                errorFloatingMessage.style.animation = 'slideUp 0.5s ease-in-out forwards, fadeOut 2s ease-in-out forwards'; // Apply animations
-
-                document.body.appendChild(errorFloatingMessage); // Append floating error message to the body
-                setTimeout(() => {
-                    errorFloatingMessage.remove(); // Remove floating error message after 2 seconds
-                }, 2000);
-                event.preventDefault();
+                const errorMessage = document.getElementById('error-message');
+                if (response.ok) {
+                    window.location.href = '/dashboard'; // Redirect to the dashboard or desired page
+                } else {
+                    errorMessage.textContent = 'Invalid username or password';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
             }
         });
-
     </script>
 </body>
 
